@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Logs
+*.log
+*.journal
+
+# n8n data (nếu không muốn commit database/logs)
+n8n-data/
+
+# Environment variables
+.env
+
+# VSCode
+.vscode/

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Nhà Hàng</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+</head>
+<body>
+    
+    <div class="hero-section">
+        <h1>Nhà Hàng Cồn Tiên</h1>
+        <p>“Từ dòng Mekong – ra biển lớn”</p>
+    </div>
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            Chatbot Hỗ Trợ Nhà Hàng
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            {% for message in history %}
+                <div class="message {{ message.type }}">
+                    {{ message.text | safe }}
+                </div>
+            {% endfor %}
+        </div>
+        <form class="chat-form" action="{{ url_for('ask') }}" method="post">
+            <input type="text" name="question" id="message-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" required>
+            <button type="submit">➤</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,447 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "be0a6081-41a3-4236-b0bf-c99fa72b1f4b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "https://drive.google.com/file/d/10xi_XhwIwJt5rpf5Viuhjw1jHgt9of-Y/view?usp=sharing",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "12bf2558-f23c-452c-813a-6404942e4d82",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "owZebzWeH1fFseDB",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-pdf-parse.pdfParse",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "0adb09d0-b142-485e-9528-147ade43c993",
+      "name": "PDF Parse"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "restaurant_data",
+          "mode": "list",
+          "cachedResultName": "restaurant_data"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "e3ba881a-b54a-45ba-8d43-290d1f780b28",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "pe9P2tvY63VpuEs1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        208
+      ],
+      "id": "2fbfd01f-daf2-4ecd-b3d3-60216d7c2a29",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        864,
+        336
+      ],
+      "id": "2532523d-cc33-4d76-b423-ca1d5385130c",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "modelName": "AITeamVN/Vietnamese_Embedding",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        480,
+        208
+      ],
+      "id": "d6216a1c-0ca2-4d03-b1b6-0a7a2cd0d24f",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "5ItZDkgM6se3pxqF",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.question }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        -464
+      ],
+      "id": "4f5545a2-4603-4344-9d0c-65147e76d3c4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -256
+      ],
+      "id": "01a180d4-ffab-4b1a-a52e-aa5e1853219a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RRyax3drYYqZFu5e",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        -256
+      ],
+      "id": "c644e299-4164-4200-b22e-a2974e6272a7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Bạn là một trợ lý ảo hữu ích cho nhà hàng Cồn Tiên. Luôn luôn dựa VÀO VÀ CHỈ DỰA VÀO \"Thông tin tham khảo\" được cung cấp để trả lời câu hỏi của người dùng.\n\nHãy định dạng câu trả lời của bạn bằng các thẻ HTML cơ bản để dễ đọc, ví dụ như dùng <ul> và <li> cho danh sách, <b> cho tiêu đề, và <br> để xuống dòng.\n\nNếu \"Thông tin tham khảo\" rỗng hoặc không chứa câu trả lời, hãy lịch sự trả lời rằng bạn không có thông tin về vấn đề đó. TUYỆT ĐỐI không được tự bịa ra câu trả lời.",
+        "tableName": {
+          "__rl": true,
+          "value": "restaurant_data",
+          "mode": "list",
+          "cachedResultName": "restaurant_data"
+        },
+        "topK": 10,
+        "options": {
+          "queryName": "match_restaurant_data"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        -464
+      ],
+      "id": "d9fb6eed-d59a-44ab-aa55-6f64e80cc128",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "pe9P2tvY63VpuEs1",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "AITeamVN/Vietnamese_Embedding",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -256
+      ],
+      "id": "3de9ac30-d229-424e-baab-645d60e5e18a",
+      "name": "Embeddings HuggingFace Inference1",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "5ItZDkgM6se3pxqF",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6950c3ea-b460-418a-85cc-ac9ac69fa032",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -416
+      ],
+      "id": "895df3e6-69ab-44ec-8a0f-a58260dffdec",
+      "name": "Webhook",
+      "webhookId": "6950c3ea-b460-418a-85cc-ac9ac69fa032"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.finalResponse }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1200,
+        -656
+      ],
+      "id": "d32106e1-2d27-4097-bc3c-ac39a7765c2d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4e3ddbc-95d0-4421-9ee1-49c2a2a263a6",
+              "name": "finalResponse",
+              "value": "={{ JSON.stringify({ answer: $json.output }) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        -688
+      ],
+      "id": "a1adb15f-3650-47f0-8086-8441b3dcd2aa",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "PDF Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF Parse": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5c0142b0-8457-4462-a740-9c065221c4f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "76c966b1c4ab8261654452888daee23a9dfd1310c8a6c937750164adf905174e"
+  },
+  "id": "rwbcxNiXgBQCRr0i",
+  "tags": []
+}
